@@ -11,7 +11,7 @@ defmodule Snek.HomeControllerTest do
   describe "GET index" do
     test "returns OK", %{conn: conn} do
       conn = get conn, home_path(conn, :index)
-      assert json_response(conn, 200) == %{}
+      assert %{"color" => _, "head" => _} = json_response(conn, 200)
     end
   end
 end
