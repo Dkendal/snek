@@ -1,8 +1,6 @@
 defmodule Snek.MoveControllerTest do
   use Snek.ConnCase
 
-  alias Snek.Move
-
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
   end

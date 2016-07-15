@@ -1,8 +1,6 @@
 defmodule Snek.StartControllerTest do
   use Snek.ConnCase
 
-  alias Snek.Start
-
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
   end
