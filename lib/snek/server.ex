@@ -2,10 +2,63 @@ defmodule Snek.Server do
   def start do
     size = 10
     board = for x <- 1..size, do: for y <- 1..size, do: 0
-    print board
+
+    #food = for _ <- 1..4, do: [:random.uniform(size), :random.uniform(size)]
+    food = [[1, 4], [3, 0], [5, 2]]
+
+    snakes = [%{
+      "color" => "#6699ff",
+      "coords" => [[4, 4], [4, 4], [4, 4]],
+      "head_url" => "",
+      "name" => "Snek",
+      "taunt" => "gotta go fast",
+      "url" => "http://localhost:4000"
+    }]
+
+    state = %{
+      "game_id" => "",
+      "turn" => 0,
+      "board" => board,
+      "snakes" => snakes,
+      "food" => food
+    }
+
+    turn state, 10
   end
 
-  def print(board) do
+  def turn(_state, 0) do
+    :ok
+  end
+
+  def turn(state, tick) do
+    Process.sleep 500
+    print state
+
+    snakes = Enum.map state["snakes"], fn snake ->
+      [dy, dx] = case Snek.Agent.move(state) do
+        "up" ->
+          [1, 0]
+        "down" ->
+          [-1, 0]
+        "left" ->
+          [0, -1]
+        "right" ->
+          [0, 1]
+      end
+      update_in(snake["coords"], fn [[y, x] = h | t] ->
+        tail = List.delete_at(t, -1)
+        [[dy + y, dx + x], h] ++ tail
+      end)
+    end
+
+    state = put_in state["snakes"], snakes
+
+    turn(state, tick - 1)
+  end
+
+  def print(%{"board" => board, "food" => food, "snakes" => snakes}) do
+    coords = Enum.flat_map snakes, & &1["coords"]
+
     max = Enum.count board
     min = -1
     range = min..max
@@ -33,13 +86,14 @@ defmodule Snek.Server do
         {y, x} when x in [min, max] and not y in [min, max] ->
           "║"
 
-        {_, _} ->
-          board
-          |> Enum.at(y)
-          |> Enum.at(x)
-          |> case do
-            0 -> " "
-            x -> x
+        {y, x} ->
+          cond do
+            Enum.member?(food, [y, x]) ->
+              "F"
+            Enum.member?(coords, [y, x]) ->
+              "X"
+            true ->
+              " "
           end
       end
       |> IO.write
