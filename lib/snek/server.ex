@@ -88,7 +88,13 @@ defmodule Snek.Server do
   end
 
   def grew(state, snake) do
-    0
+    head = hd snake["coords"]
+
+    if Enum.member? state["food"], head do
+      1
+    else
+      0
+    end
   end
 
   def move(snake, direction) do
