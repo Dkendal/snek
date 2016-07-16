@@ -54,6 +54,17 @@ defmodule Snek.Server do
       end
     end
 
+    state = update_in state["snakes"], fn snakes ->
+      for snake <- snakes do
+        increase = grew(state, snake)
+        update_in snake["coords"], fn coords ->
+          last = List.last coords
+          new_segments = for i <- 0..increase, i > 0, do: last
+          coords ++ new_segments
+        end
+      end
+    end
+
     Process.sleep 500
 
     turn(state)
@@ -74,6 +85,10 @@ defmodule Snek.Server do
     Enum.any? state["snakes"], fn %{"coords" => [_ | body]} ->
       Enum.member? body, head
     end
+  end
+
+  def grew(state, snake) do
+    0
   end
 
   def move(snake, direction) do
