@@ -26,24 +26,36 @@ defmodule Snek.Server do
       "food" => food
     }
 
-    turn state
+    tick state
   end
 
-  def turn(%{"snakes" => []} = state) do
+  def tick(%{"snakes" => []} = state) do
     print state
     IO.puts "Game Over"
     :ok
   end
 
-  def turn(state) do
+  def tick(state) do
     print state
 
-    # move all snakes
+    Process.sleep 500
+
+    state
+    |> make_move
+    |> bring_out_your_dead
+    |> grow_snakes
+    |> replace_eaten_food
+    |> tick
+  end
+
+
+  def make_move state do
     state = update_in state["snakes"], fn snakes ->
       for snake <- snakes, do: move(snake, Snek.Agent.move(state))
     end
+  end
 
-    # remove dead
+  def bring_out_your_dead state do
     state = update_in state["snakes"], fn snakes ->
       Enum.reduce snakes, [], fn snake, snakes ->
         if dead?(state, snake) do
@@ -53,10 +65,13 @@ defmodule Snek.Server do
         end
       end
     end
+  end
 
+  def grow_snakes state do
     state = update_in state["snakes"], fn snakes ->
       for snake <- snakes do
         increase = grew(state, snake)
+
         update_in snake["coords"], fn coords ->
           last = List.last coords
           new_segments = for i <- 0..increase, i > 0, do: last
@@ -64,7 +79,9 @@ defmodule Snek.Server do
         end
       end
     end
+  end
 
+  def replace_eaten_food state do
     state = update_in state["food"], fn food ->
       Enum.reduce food, [], fn apple, food ->
         if eaten?(state, apple) do
@@ -74,10 +91,6 @@ defmodule Snek.Server do
         end
       end
     end
-
-    Process.sleep 500
-
-    turn(state)
   end
 
   def eaten?(state, apple) do
