@@ -6,32 +6,35 @@ defmodule Snek.Server do
     #food = for _ <- 1..4, do: [:random.uniform(size), :random.uniform(size)]
     food = [[1, 4], [3, 0], [5, 2]]
 
-    snakes = [%{
-      "color" => "#6699ff",
-      "coords" => [[4, 4], [4, 4], [4, 4]],
-      "head_url" => "",
-      "name" => "Snek",
-      "taunt" => "gotta go fast",
-      "url" => "http://localhost:4000"
-    }]
+    snakes = [
+      %{
+        "color" => "#6699ff",
+        "coords" => [[4, 4], [4, 4], [4, 4]],
+        "head_url" => "",
+        "name" => "Snek",
+        "taunt" => "gotta go fast",
+        "url" => "http://localhost:4000"
+      }
+    ]
 
-  state = %{
-    "game_id" => "",
-    "turn" => 0,
-    "board" => board,
-    "snakes" => snakes,
-    "food" => food
-  }
+    state = %{
+      "game_id" => "",
+      "turn" => 0,
+      "board" => board,
+      "snakes" => snakes,
+      "food" => food
+    }
 
-  turn state, 10
+    turn state
   end
 
-  def turn(_state, 0) do
+  def turn(%{"snakes" => []} = state) do
+    print state
+    IO.puts "Game Over"
     :ok
   end
 
-  def turn(state, tick) do
-    Process.sleep 500
+  def turn(state) do
     print state
 
     # move all snakes
@@ -50,7 +53,8 @@ defmodule Snek.Server do
       end
     end
 
-    turn(state, tick - 1)
+    Process.sleep 500
+    turn(state)
   end
 
   def dead?(state, snake) do
