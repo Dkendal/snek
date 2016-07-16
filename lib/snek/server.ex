@@ -65,9 +65,28 @@ defmodule Snek.Server do
       end
     end
 
+    state = update_in state["food"], fn food ->
+      Enum.reduce food, [], fn apple, food ->
+        if eaten?(state, apple) do
+          food
+        else
+          [apple | food]
+        end
+      end
+    end
+
     Process.sleep 500
 
     turn(state)
+  end
+
+  def eaten?(state, apple) do
+    Enum.any? state["snakes"], fn
+      %{"coords" => [^apple | _]} ->
+        true
+      _ ->
+        false
+    end
   end
 
   # wall collisions
