@@ -2,7 +2,7 @@ defmodule Snek.Server do
   @size 20
 
   def start do
-    board = for x <- 1..@size, do: for y <- 1..@size, do: 0
+    board = for x <- 0..@size, do: for y <- 0..@size, do: 0
 
     #food = for _ <- 1..4, do: [:random.uniform(size), :random.uniform(size)]
     food = [[1, 4], [3, 0], [5, 2]]
@@ -60,9 +60,9 @@ defmodule Snek.Server do
   end
 
   # wall collisions
-  def dead?(_state, %{"coords" => [[0, _] | _]}),
+  def dead?(_state, %{"coords" => [[-1, _] | _]}),
     do: true
-  def dead?(_state, %{"coords" => [[_, 0] | _]}),
+  def dead?(_state, %{"coords" => [[_, -1] | _]}),
     do: true
   def dead?(_state, %{"coords" => [[@size, _] | _]}),
     do: true
