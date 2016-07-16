@@ -1,6 +1,6 @@
 defmodule Snek.Server do
   def start do
-    size = 10
+    size = 20
     board = for x <- 1..size, do: for y <- 1..size, do: 0
 
     #food = for _ <- 1..4, do: [:random.uniform(size), :random.uniform(size)]
@@ -15,15 +15,15 @@ defmodule Snek.Server do
       "url" => "http://localhost:4000"
     }]
 
-    state = %{
-      "game_id" => "",
-      "turn" => 0,
-      "board" => board,
-      "snakes" => snakes,
-      "food" => food
-    }
+  state = %{
+    "game_id" => "",
+    "turn" => 0,
+    "board" => board,
+    "snakes" => snakes,
+    "food" => food
+  }
 
-    turn state, 10
+  turn state, 10
   end
 
   def turn(_state, 0) do
@@ -79,34 +79,33 @@ defmodule Snek.Server do
     for y <- range, x <- range do
       case {y, x} do
         {^min, ^min} ->
-          "╔"
+          "╔═"
 
         {^min, ^max} ->
-          "╗"
+          "╗ "
 
         {^max, ^min} ->
-          "╚"
+          "╚═"
 
         {^max, ^max} ->
-          "╝"
+          "╝ "
 
         {y, x} when y in [min, max] and not x in [min, max] ->
-          "═"
+          "══"
 
         {y, x} when x in [min, max] and not y in [min, max] ->
-          "║"
+          "║ "
 
         {y, x} ->
           cond do
             Enum.member?(food, [y, x]) ->
-              "F"
+              "()"
             Enum.member?(coords, [y, x]) ->
-              "X"
+              "[]"
             true ->
-              " "
+              "  "
           end
-      end
-      |> IO.write
+      end |> IO.write
 
       if x == max do
         IO.write "\n"
