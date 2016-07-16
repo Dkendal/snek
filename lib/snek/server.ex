@@ -35,25 +35,35 @@ defmodule Snek.Server do
     print state
 
     snakes = Enum.map state["snakes"], fn snake ->
-      [dy, dx] = case Snek.Agent.move(state) do
-        "up" ->
-          [1, 0]
-        "down" ->
-          [-1, 0]
-        "left" ->
-          [0, -1]
-        "right" ->
-          [0, 1]
-      end
-      update_in(snake["coords"], fn [[y, x] = h | t] ->
-        tail = List.delete_at(t, -1)
-        [[dy + y, dx + x], h] ++ tail
-      end)
+      move(snake, Snek.Agent.move(state))
     end
 
     state = put_in state["snakes"], snakes
 
     turn(state, tick - 1)
+  end
+
+  def move(snake, direction) do
+    [dy, dx] = case direction do
+      "up" ->
+        [1, 0]
+      "down" ->
+        [-1, 0]
+      "left" ->
+        [0, -1]
+      "right" ->
+        [0, 1]
+    end
+
+    body = snake["coords"]
+
+    [y, x] = hd(body)
+
+    tail = List.delete_at(body, -1)
+
+    new_coords = [[dy + y, dx + x]] ++ tail
+
+    put_in snake["coords"], new_coords
   end
 
   def print(%{"board" => board, "food" => food, "snakes" => snakes}) do
