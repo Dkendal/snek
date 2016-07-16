@@ -68,7 +68,7 @@ defmodule Snek.Server do
     state = update_in state["food"], fn food ->
       Enum.reduce food, [], fn apple, food ->
         if eaten?(state, apple) do
-          food
+          [new_fruit(state) | food]
         else
           [apple | food]
         end
@@ -86,6 +86,25 @@ defmodule Snek.Server do
         true
       _ ->
         false
+    end
+  end
+
+  def new_fruit(state) do
+    snakes = Enum.flat_map state["snakes"], & &1["coords"]
+    food = state["food"]
+    new_fruit(snakes, food)
+  end
+
+  def new_fruit(snakes, food) do
+    x = :random.uniform(@size) - 1
+    y = :random.uniform(@size) - 1
+
+    apple = [y, x]
+
+    if not apple in snakes and not apple in food do
+      apple
+    else
+      new_fruit(snakes, food)
     end
   end
 
