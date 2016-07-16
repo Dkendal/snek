@@ -69,8 +69,11 @@ defmodule Snek.Server do
   def dead?(_state, %{"coords" => [[_, @size] | _]}),
     do: true
 
+  # check for collisions with snake bodies
   def dead?(state, %{"coords" => [head | _]}) do
-    false
+    Enum.any? state["snakes"], fn %{"coords" => [_ | body]} ->
+      Enum.member? body, head
+    end
   end
 
   def move(snake, direction) do
