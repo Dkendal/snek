@@ -94,9 +94,9 @@ defmodule Snek.Server do
   def move(snake, direction) do
     [dy, dx] = case direction do
       "up" ->
-        [1, 0]
-      "down" ->
         [-1, 0]
+      "down" ->
+        [1, 0]
       "left" ->
         [0, -1]
       "right" ->
