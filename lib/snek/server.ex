@@ -15,7 +15,6 @@ defmodule Snek.Server do
       }
     ]
 
-
     state = %{
       "game_id" => "",
       "turn" => 0,
@@ -51,7 +50,7 @@ defmodule Snek.Server do
   def init_food state, max do
     Enum.reduce 1..max, state, fn _, state ->
       update_in state["food"], fn food ->
-        [new_fruit(state) | food]
+        [rand_unoccupied_space(state) | food]
       end
     end
   end
@@ -92,7 +91,7 @@ defmodule Snek.Server do
     state = update_in state["food"], fn food ->
       Enum.reduce food, [], fn apple, food ->
         if eaten?(state, apple) do
-          [new_fruit(state) | food]
+          [rand_unoccupied_space(state) | food]
         else
           [apple | food]
         end
@@ -109,22 +108,22 @@ defmodule Snek.Server do
     end
   end
 
-  def new_fruit(state) do
+  def rand_unoccupied_space(state) do
     snakes = Enum.flat_map state["snakes"], & &1["coords"]
     food = state["food"]
-    new_fruit(snakes, food)
+    rand_unoccupied_space(snakes, food)
   end
 
-  def new_fruit(snakes, food) do
+  def rand_unoccupied_space(snakes, food) do
     x = :random.uniform(@size) - 1
     y = :random.uniform(@size) - 1
 
-    apple = [y, x]
+    new_pos = [y, x]
 
-    if not apple in snakes and not apple in food do
-      apple
+    if not new_pos in snakes and not new_pos in food do
+      new_pos
     else
-      new_fruit(snakes, food)
+      rand_unoccupied_space(snakes, food)
     end
   end
 
