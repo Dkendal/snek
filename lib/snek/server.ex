@@ -4,9 +4,6 @@ defmodule Snek.Server do
   def start do
     board = for x <- 0..@size, do: for y <- 0..@size, do: 0
 
-    #food = for _ <- 1..4, do: [:random.uniform(size), :random.uniform(size)]
-    food = [[1, 4], [3, 0], [5, 2]]
-
     snakes = [
       %{
         "color" => "#6699ff",
@@ -18,13 +15,16 @@ defmodule Snek.Server do
       }
     ]
 
+
     state = %{
       "game_id" => "",
       "turn" => 0,
       "board" => board,
       "snakes" => snakes,
-      "food" => food
+      "food" => []
     }
+
+    state = init_food state, 4
 
     tick state
   end
@@ -48,6 +48,13 @@ defmodule Snek.Server do
     |> tick
   end
 
+  def init_food state, max do
+    Enum.reduce 1..max, state, fn _, state ->
+      update_in state["food"], fn food ->
+        [new_fruit(state) | food]
+      end
+    end
+  end
 
   def make_move state do
     state = update_in state["snakes"], fn snakes ->
