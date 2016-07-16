@@ -34,13 +34,27 @@ defmodule Snek.Server do
     Process.sleep 500
     print state
 
-    snakes = Enum.map state["snakes"], fn snake ->
-      move(snake, Snek.Agent.move(state))
+    # move all snakes
+    state = update_in state["snakes"], fn snakes ->
+      for snake <- snakes, do: move(snake, Snek.Agent.move(state))
     end
 
-    state = put_in state["snakes"], snakes
+    # remove dead
+    state = update_in state["snakes"], fn snakes ->
+      Enum.reduce snakes, [], fn snake, snakes ->
+        if dead?(state, snake) do
+          snakes
+        else
+          [snake | snakes]
+        end
+      end
+    end
 
     turn(state, tick - 1)
+  end
+
+  def dead?(state, snake) do
+    true
   end
 
   def move(snake, direction) do
@@ -68,6 +82,10 @@ defmodule Snek.Server do
 
   def print(%{"board" => board, "food" => food, "snakes" => snakes}) do
     coords = Enum.flat_map snakes, & &1["coords"]
+
+    # Enum.reduce(coords, %{}, fn [y, x], acc ->
+    #   put_in(acc, [Access.key(y, %{}), x], "snake")
+    # end)
 
     max = Enum.count board
     min = -1
