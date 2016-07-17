@@ -1,8 +1,9 @@
 defmodule Snek.Server do
   @size 20
+  @valid_range 0..(@size - 1)
 
   def start do
-    board = for x <- 0..@size, do: for y <- 0..@size, do: 0
+    board = for x <- 0..@size, do: for y <- 0..@size, do: %{}
 
     snakes = [
       %{
@@ -23,9 +24,11 @@ defmodule Snek.Server do
       "food" => []
     }
 
-    state = init_food state, 4
-
-    tick state
+    state
+    |> init_food(4)
+    |> set_objects
+    |> update_board
+    |> tick
   end
 
   def tick(%{"snakes" => []} = state) do
@@ -44,7 +47,48 @@ defmodule Snek.Server do
     |> bring_out_your_dead
     |> grow_snakes
     |> replace_eaten_food
+    |> set_objects
+    |> update_board
     |> tick
+  end
+
+  def set_objects state do
+    food_obj = %{"state" => "food"}
+
+    objs = %{}
+
+    objs = Enum.reduce state["food"], objs, fn [y, x], acc ->
+      add_at acc, y, x, food_obj
+    end
+
+    objs = Enum.reduce state["snakes"], objs, fn snake, acc ->
+      name = snake["name"]
+
+      [[y, x] | body] = Enum.uniq snake["coords"]
+
+      acc = add_at acc, y, x, %{"state" => "head", name => name}
+
+      Enum.reduce body, acc, fn [y, x], acc ->
+        add_at acc, y, x, %{"state" => "body", name => name}
+      end
+    end
+
+    state = put_in state["objects"], objs
+  end
+
+  def update_board state do
+    empty_obj = %{"state" => "empty"}
+
+    board = for y <- @valid_range do
+      for x <- @valid_range do
+        case state["objects"][y][x] do
+          %{} = obj -> obj
+          _ -> empty_obj
+        end
+      end
+    end
+
+    state = put_in state["board"], board
   end
 
   def init_food state, max do
@@ -177,14 +221,10 @@ defmodule Snek.Server do
     put_in snake["coords"], new_coords
   end
 
-  def print(%{"board" => board, "food" => food, "snakes" => snakes}) do
+  def print(%{"board" => board, "food" => food, "snakes" => snakes} = state) do
     coords = Enum.flat_map snakes, & &1["coords"]
 
-    # Enum.reduce(coords, %{}, fn [y, x], acc ->
-    #   put_in(acc, [Access.key(y, %{}), x], "snake")
-    # end)
-
-    max = Enum.count board
+    max = @size
     min = -1
     range = min..max
 
@@ -212,14 +252,21 @@ defmodule Snek.Server do
           "║ "
 
         {y, x} ->
-          cond do
-            Enum.member?(food, [y, x]) ->
-              "()"
-            Enum.member?(coords, [y, x]) ->
+          board
+          |> Enum.at(y)
+          |> Enum.at(x)
+          |> get_in(["state"])
+          |> case do
+            "head" ->
+              "{}"
+            "body" ->
               "[]"
-            true ->
+            "food" ->
+              "()"
+            "empty" ->
               "  "
           end
+
       end |> IO.write
 
       if x == max do
@@ -227,6 +274,10 @@ defmodule Snek.Server do
       end
     end
 
-    :ok
+    state
+  end
+
+  def add_at acc, y, x, obj do
+    put_in acc, [Access.key(y, %{}), Access.key(x, %{})], obj
   end
 end
