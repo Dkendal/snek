@@ -1,6 +1,17 @@
 defmodule Snek.World do
   @size 20
   @valid_range 0..(@size - 1)
+  @up [-1, 0]
+  @down [1, 0]
+  @left [0, -1]
+  @right [0, 1]
+
+  def new(snakes \\ [], food \\ []) do
+    %{
+      "snakes" => snakes,
+      "food" => food,
+    }
+  end
 
   def set_objects state do
     food_obj = %{"state" => "food"}
@@ -31,6 +42,13 @@ defmodule Snek.World do
     state = put_in state[:snake_dict], snake_dict
 
     state = put_in state["objects"], objs
+  end
+
+  def step(state) do
+    state
+    |> clean_up_dead
+    |> grow_snakes
+    |> remove_eaten_food
   end
 
   def update_board state do
@@ -67,7 +85,7 @@ defmodule Snek.World do
     end
   end
 
-  def bring_out_your_dead state do
+  def clean_up_dead state do
     state = update_in state["snakes"], fn snakes ->
       Enum.reduce snakes, [], fn snake, snakes ->
         if dead?(state, snake) do
@@ -79,6 +97,46 @@ defmodule Snek.World do
     end
   end
 
+  def grow_snakes state do
+    state = update_in state["snakes"], fn snakes ->
+      for snake <- snakes do
+        increase = grew(state, snake)
+
+        update_in snake["coords"], fn coords ->
+          last = List.last coords
+          new_segments = for i <- 0..increase, i > 0, do: last
+          coords ++ new_segments
+        end
+      end
+    end
+  end
+
+  def remove_eaten_food(state) do
+    update_in state["food"], fn food ->
+      Enum.reject food, &eaten?(state, &1)
+    end
+  end
+
+  def eaten?(state, apple) do
+    Enum.any? state["snakes"], fn
+      %{"coords" => [^apple | _]} ->
+        true
+      _ ->
+        false
+    end
+  end
+
+
+  def grew(state, snake) do
+    head = hd snake["coords"]
+
+    if head in state["food"] do
+      1
+    else
+      0
+    end
+  end
+
   def add_at acc, y, x, obj do
     put_in acc, [Access.key(y, %{}), Access.key(x, %{})], obj
   end
@@ -86,13 +144,13 @@ defmodule Snek.World do
   def move(snake, direction) do
     [dy, dx] = case direction do
       "up" ->
-        [-1, 0]
+        @up
       "down" ->
-        [1, 0]
+        @down
       "left" ->
-        [0, -1]
+        @left
       "right" ->
-        [0, 1]
+        @right
     end
 
     body = snake["coords"]

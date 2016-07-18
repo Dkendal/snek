@@ -1,5 +1,6 @@
 defmodule Snek.Server do
   @size 20
+  @max_food 1
   @valid_range 0..(@size - 1)
 
   import Snek.World
@@ -27,28 +28,28 @@ defmodule Snek.Server do
     }
 
     state
-    |> init_food(4)
+    |> init_food(@max_food)
     |> update_board
     |> tick
   end
 
   def tick(%{"snakes" => []} = state) do
-    # print state
+    print state
     IO.puts "Game Over"
     :ok
   end
 
   def tick(state) do
-    print state
-
-    Process.sleep 30
+    if rem(state["turn"], 4) == 0 do
+      print state
+      Process.sleep 30
+    end
 
     state
     |> update_in(["turn"], & &1 + 1)
     |> make_move
-    |> bring_out_your_dead
-    |> grow_snakes
-    |> replace_eaten_food
+    |> step
+    |> add_new_food
     |> update_board
     |> tick
   end
@@ -67,39 +68,21 @@ defmodule Snek.Server do
     end
   end
 
-  def grow_snakes state do
-    state = update_in state["snakes"], fn snakes ->
-      for snake <- snakes do
-        increase = grew(state, snake)
+  def add_new_food(state) do
+    update_in state["food"], fn food ->
+      new_food =
+        for i <- 0..(@max_food - length(food)),
+        i > 0,
+        do: rand_unoccupied_space(state)
 
-        update_in snake["coords"], fn coords ->
-          last = List.last coords
-          new_segments = for i <- 0..increase, i > 0, do: last
-          coords ++ new_segments
-        end
-      end
+      food ++ new_food
     end
   end
 
   def replace_eaten_food state do
-    state = update_in state["food"], fn food ->
-      Enum.reduce food, [], fn apple, food ->
-        if eaten?(state, apple) do
-          [rand_unoccupied_space(state) | food]
-        else
-          [apple | food]
-        end
-      end
-    end
-  end
-
-  def eaten?(state, apple) do
-    Enum.any? state["snakes"], fn
-      %{"coords" => [^apple | _]} ->
-        true
-      _ ->
-        false
-    end
+    state
+    |> remove_eaten_food
+    |> add_new_food
   end
 
   def rand_unoccupied_space(state) do
@@ -118,16 +101,6 @@ defmodule Snek.Server do
       new_pos
     else
       rand_unoccupied_space(snakes, food)
-    end
-  end
-
-  def grew(state, snake) do
-    head = hd snake["coords"]
-
-    if Enum.member? state["food"], head do
-      1
-    else
-      0
     end
   end
 
