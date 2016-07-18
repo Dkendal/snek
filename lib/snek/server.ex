@@ -287,6 +287,10 @@ defmodule Snek.Server do
 
     IO.puts "Turn: #{state["turn"]}"
 
+    for snake <- state["snakes"] do
+      IO.puts "#{snake["name"]}: #{length snake["coords"]}"
+    end
+
     state
   end
 
