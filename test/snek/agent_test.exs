@@ -14,7 +14,7 @@ defmodule Snek.AgentTest do
       "food" => [[0, 0]]
     }
 
-    state = Snek.Server.update_board(state)
+    state = Snek.World.update_board(state)
 
     %{state: state}
   end
