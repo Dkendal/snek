@@ -42,6 +42,7 @@ defmodule Snek.Server do
     Process.sleep 30
 
     state
+    |> update_in(["turn"], & &1 + 1)
     |> make_move
     |> bring_out_your_dead
     |> grow_snakes
@@ -283,6 +284,8 @@ defmodule Snek.Server do
         IO.write "\n"
       end
     end
+
+    IO.puts "Turn: #{state["turn"]}"
 
     state
   end
