@@ -234,13 +234,13 @@ defmodule Snek.Server do
     for y <- range, x <- range do
       case {y, x} do
         {^min, ^min} ->
-          "╔═"
+          " ╔"
 
         {^min, ^max} ->
           "╗ "
 
         {^max, ^min} ->
-          "╚═"
+          " ╚"
 
         {^max, ^max} ->
           "╝ "
@@ -248,7 +248,10 @@ defmodule Snek.Server do
         {y, x} when y in [min, max] and not x in [min, max] ->
           "══"
 
-        {y, x} when x in [min, max] and not y in [min, max] ->
+        {_, ^min} ->
+          " ║"
+
+        {_, ^max} ->
           "║ "
 
         {y, x} ->
