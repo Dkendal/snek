@@ -26,13 +26,12 @@ defmodule Snek.Server do
 
     state
     |> init_food(4)
-    |> set_objects
     |> update_board
     |> tick
   end
 
   def tick(%{"snakes" => []} = state) do
-    print state
+    # print state
     IO.puts "Game Over"
     :ok
   end
@@ -40,14 +39,13 @@ defmodule Snek.Server do
   def tick(state) do
     print state
 
-    Process.sleep 500
+    Process.sleep 30
 
     state
     |> make_move
     |> bring_out_your_dead
     |> grow_snakes
     |> replace_eaten_food
-    |> set_objects
     |> update_board
     |> tick
   end
@@ -73,11 +71,20 @@ defmodule Snek.Server do
       end
     end
 
+    snake_dict = Enum.reduce state["snakes"], %{}, fn snake, acc ->
+      name = snake["name"]
+      put_in acc[name], snake
+    end
+
+    state = put_in state[:snake_dict], snake_dict
+
     state = put_in state["objects"], objs
   end
 
   def update_board state do
     empty_obj = %{"state" => "empty"}
+
+    state = set_objects state
 
     board = for y <- @valid_range do
       for x <- @valid_range do
