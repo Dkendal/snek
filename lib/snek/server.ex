@@ -2,8 +2,8 @@ defmodule Snek.Server do
   @size 20
   @max_food 1
   @valid_range 0..(@size - 1)
-  @draw_frames 1
-  @turn_delay 200
+  @draw_frames 4
+  @turn_delay 50
 
   import Snek.World
 
@@ -35,13 +35,15 @@ defmodule Snek.Server do
     |> tick
   end
 
-  def tick(%{"snakes" => []} = state) do
-    print state
+  def tick(%{"snakes" => []} = state, previous) do
+    print previous
     IO.puts "Game Over"
     :ok
   end
 
-  def tick(state) do
+  def tick(state), do: tick(state, state)
+
+  def tick(state, previous) do
     if rem(state["turn"], @draw_frames) == 0 do
       print state
       Process.sleep @turn_delay
@@ -53,7 +55,7 @@ defmodule Snek.Server do
     |> step
     |> add_new_food
     |> update_board
-    |> tick
+    |> tick(state)
   end
 
   def init_food state, max do
