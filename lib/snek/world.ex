@@ -5,21 +5,33 @@ defmodule Snek.World do
   @down [1, 0]
   @left [0, -1]
   @right [0, 1]
+  @food %{"state" => "food"}
 
-  def new(snakes \\ [], food \\ []) do
-    %{
-      "snakes" => snakes,
-      "food" => food,
+  def new(params) do
+    default = %{
+      "snakes" => [],
+      "food" => [],
     }
+
+    Dict.merge default, params
+  end
+
+  # set :rows and :cols on world state
+  def set_dimensions state do
+    rows = length state["board"]
+    cols = length hd state["board"]
+
+    state
+    |> put_in([:rows], rows)
+    |> put_in([:cols], cols)
   end
 
   def set_objects state do
-    food_obj = %{"state" => "food"}
 
     objs = %{}
 
     objs = Enum.reduce state["food"], objs, fn [y, x], acc ->
-      add_at acc, y, x, food_obj
+      add_at acc, y, x, @food
     end
 
     objs = Enum.reduce state["snakes"], objs, fn snake, acc ->

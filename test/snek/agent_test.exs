@@ -11,7 +11,7 @@ defmodule Snek.AgentTest do
 
     food = [[0,0]]
 
-    state = Snek.World.new snakes, food
+    state = Snek.World.new %{"snakes" => snakes, "food" => food}
 
     state = Snek.World.update_board(state)
 
