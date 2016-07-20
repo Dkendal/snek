@@ -2,6 +2,8 @@ defmodule Snek.Server do
   @size 20
   @max_food 1
   @valid_range 0..(@size - 1)
+  @draw_frames 1
+  @turn_delay 200
 
   import Snek.World
 
@@ -40,9 +42,9 @@ defmodule Snek.Server do
   end
 
   def tick(state) do
-    if rem(state["turn"], 4) == 0 do
+    if rem(state["turn"], @draw_frames) == 0 do
       print state
-      Process.sleep 30
+      Process.sleep @turn_delay
     end
 
     state
