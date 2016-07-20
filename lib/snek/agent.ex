@@ -91,7 +91,7 @@ defmodule Snek.Agent do
   end
 
   def this(state) do
-    state.snake_dict[@name]
+    state.snake_map[@name]
   end
 
   def wall?(state, [_, -1]), do: true

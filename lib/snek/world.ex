@@ -5,7 +5,9 @@ defmodule Snek.World do
   @down [1, 0]
   @left [0, -1]
   @right [0, 1]
-  @food %{"state" => "food"}
+  @food_obj %{"state" => "food"}
+  @empty_obj %{"state" => "empty"}
+
 
   def new(params) do
     default = %{
@@ -18,42 +20,58 @@ defmodule Snek.World do
 
   # set :rows and :cols on world state
   def set_dimensions state do
-    rows = length state["board"]
-    cols = length hd state["board"]
+    board = board(state)
+    rows = length board
+    cols = length hd board
 
     state
     |> put_in([:rows], rows)
     |> put_in([:cols], cols)
   end
 
-  def set_objects state do
-
-    objs = %{}
-
-    objs = Enum.reduce state["food"], objs, fn [y, x], acc ->
-      add_at acc, y, x, @food
-    end
-
-    objs = Enum.reduce state["snakes"], objs, fn snake, acc ->
-      name = snake["name"]
-
-      [[y, x] | body] = Enum.uniq snake["coords"]
-
-      acc = add_at acc, y, x, %{"state" => "head", name => name}
-
-      Enum.reduce body, acc, fn [y, x], acc ->
-        add_at acc, y, x, %{"state" => "body", name => name}
-      end
-    end
-
-    snake_dict = Enum.reduce state["snakes"], %{}, fn snake, acc ->
+  # set the :snake_map index
+  def put_snakes_in_map state do
+    snake_map = Enum.reduce state["snakes"], %{}, fn snake, acc ->
       name = snake["name"]
       put_in acc[name], snake
     end
 
-    state = put_in state[:snake_dict], snake_dict
+    state = put_in state[:snake_map], snake_map
+  end
 
-    state = put_in state["objects"], objs
+  def set_objects state do
+    build_snake_map build_map state
+  end
+
+  def delete_map state do
+    put_in state[:map], %{}
+  end
+
+  def put_food_in_map state do
+    Enum.reduce state["food"], state, fn [y, x], state ->
+      put_in state, path(y, x), @food_obj
+    end
+  end
+
+  def build_snake_map state do
+    Enum.reduce state["snakes"], state, fn snake, state ->
+      name = snake["name"]
+      head_obj = %{"state" => "head", name => name}
+      body_obj = %{"state" => "body", name => name}
+
+      [[y, x] | body] = Enum.uniq snake["coords"]
+
+      state = put_in state, path(y, x), head_obj
+
+      Enum.reduce body, state, fn [y, x], state ->
+        put_in state, path(y, x), body_obj
+      end
+    end
+  end
+
+  # sets the :map on the game
+  def build_map state do
+    put_snakes_in_map put_food_in_map delete_map state
   end
 
   def step(state) do
@@ -64,15 +82,13 @@ defmodule Snek.World do
   end
 
   def update_board state do
-    empty_obj = %{"state" => "empty"}
-
     state = set_objects state
 
     board = for y <- @valid_range do
       for x <- @valid_range do
-        case state["objects"][y][x] do
+        case state[:map][y][x] do
           %{} = obj -> obj
-          _ -> empty_obj
+          _ -> @empty_obj
         end
       end
     end
@@ -149,10 +165,6 @@ defmodule Snek.World do
     end
   end
 
-  def add_at acc, y, x, obj do
-    put_in acc, [Access.key(y, %{}), Access.key(x, %{})], obj
-  end
-
   def move(snake, direction) do
     [dy, dx] = case direction do
       "up" ->
@@ -174,5 +186,17 @@ defmodule Snek.World do
     new_coords = [[dy + y, dx + x]] ++ tail
 
     put_in snake["coords"], new_coords
+  end
+
+  def board(state) do
+    state["board"]
+  end
+
+  def path(y, x) do
+    [
+      Access.key(:map, %{}),
+      Access.key(y, %{}),
+      Access.key(x, %{})
+    ]
   end
 end
