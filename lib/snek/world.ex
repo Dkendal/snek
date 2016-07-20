@@ -165,6 +165,17 @@ defmodule Snek.World do
     end
   end
 
+  def apply_moves state, moves do
+    update_in state["snakes"], fn snakes ->
+      for snake <- snakes do
+        name = snake["name"]
+        direction = get_in moves, [name]
+
+        move(snake, direction)
+      end
+    end
+  end
+
   def move(snake, direction) do
     [dy, dx] = case direction do
       "up" ->

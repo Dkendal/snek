@@ -63,9 +63,16 @@ defmodule Snek.Server do
   end
 
   def make_move state do
-    state = update_in state["snakes"], fn snakes ->
-      for snake <- snakes, do: move(snake, Snek.Agent.move(state))
+    moves = for snake <- state["snakes"] do
+      name = snake["name"]
+      direction = Snek.Agent.move(state)
+      {name, direction}
     end
+
+    moves = Enum.into moves, %{}
+
+    IO.inspect moves
+    apply_moves state, moves
   end
 
   def add_new_food(state) do

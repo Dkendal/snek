@@ -10,19 +10,12 @@ defmodule Snek.Agent do
 
   @name "Snek"
 
-  def move(state) do
-    food = food(state)
-    next = next(state)
+   def move(state) do
+     food = food(state)
+     next = next(state)
 
-    direction(state, next)
-    # case 1 do
-    # # case :random.uniform 1 do
-    #   1 -> "up"
-    #   2 -> "left"
-    #   3 -> "down"
-    #   4 -> "right"
-    # end
-  end
+     direction(state, next)
+   end
 
   def direction(state, v) do
     case V.sub(head(state), v) do
@@ -53,10 +46,9 @@ defmodule Snek.Agent do
   end
 
   def utility(state, v) do
-    d = Stream.map(food(state), fn apple ->
+    d = Enum.min Stream.map(food(state), fn apple ->
       V.distance(apple, v)
     end)
-    |> Enum.min
 
     if d == 0, do: 1, else: 1.0/d
   end
