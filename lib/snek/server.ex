@@ -69,7 +69,7 @@ defmodule Snek.Server do
   def make_move state do
     moves = for snake <- state["snakes"] do
       name = snake["name"]
-      direction = Snek.Agent.move(state)
+      direction = Snek.Agent.move(state, name)
       {name, direction}
     end
 
@@ -123,7 +123,7 @@ defmodule Snek.Server do
     range = min..max
 
     # clear
-    IO.write("\ec")
+    if @clear, do: IO.write("\ec")
 
     for y <- range, x <- range do
       case {y, x} do

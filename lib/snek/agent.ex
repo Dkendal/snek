@@ -1,5 +1,8 @@
 defmodule Snek.Agent do
+  alias Snek.{World}
   alias Vector, as: V
+
+  @directions ~W(up down left right)
 
   @moves [
     [0, 1],
@@ -8,88 +11,105 @@ defmodule Snek.Agent do
     [-1, 0],
   ]
 
-  @name "Snek"
+  # local representation of a world state, with the name of the snake enocoded
+  defmodule Local do
+    defstruct [
+      :name, # name of this snake
+      :world, # game state
+      moves: [],
+      utility: %{}
+    ]
 
-   def move(state) do
-     food = food(state)
-     next = next(state)
+    def score local do
+      get_in(local.utility, [Access.key(local.name, 0.0)])
+    end
+  end
 
-     direction(state, next)
+   def move(state, name) do
+     state = put_in state["board"], nil
+     move %Local{
+       name: name,
+       world: state,
+     }
    end
 
-  def direction(state, v) do
-    case V.sub(head(state), v) do
-      [0, 1] ->
-        "left"
-      [1, 0] ->
-        "up"
-      [0, -1] ->
-        "right"
-      [-1, 0] ->
-        "down"
-    end
-  end
+   defp move(local) do
+     locals = search(local, 1)
 
-  def next(state) do
-    f = frontier(state)
-    v = remove_collisions(state, f)
-    best_choice(state, v, f)
-  end
+     local = Enum.max_by locals, fn local ->
+       Local.score(local)
+     end
 
-  # out of options, next move is death
-  def best_choice(state, [], [v | _]) do
-    v
-  end
+     Enum.each locals, fn x ->
+       s = Float.round(Local.score(x), 2)
 
-  def best_choice(state, nodes, _frontier) do
-    Enum.max_by(nodes, fn v -> utility(state, v) end)
-  end
+       IO.inspect {x.moves, s}
+     end
 
-  def utility(state, v) do
-    d = Enum.min Stream.map(food(state), fn apple ->
-      V.distance(apple, v)
-    end)
+     List.last local.moves
+   end
 
-    if d == 0, do: 1, else: 1.0/d
-  end
+   def search(local, 0) do
+     [local]
+   end
 
-  def frontier(state) do
-    pos = head(state)
+   def search(local, depth) do
+     Enum.flat_map @directions, fn dir ->
+       local = update_in local.moves, fn moves ->
+         [dir | moves]
+       end
 
-    moves = Enum.map @moves, fn v ->
-      V.add(v, pos)
-    end
-  end
+       local = update_in local.world, fn state ->
+         state
+         |> World.apply_moves(%{local.name => dir})
+         |> World.step()
+         |> World.set_objects()
+       end
 
-  def remove_collisions(state, moves) do
-    moves = Enum.reject moves, & wall?(state, &1)
-    moves -- tail(state)
-  end
+       snakes = local.world["snakes"]
+       world = local.world
 
-  def food(state) do
-    state["food"]
-  end
+       utility = Enum.reduce snakes, %{}, fn snake, acc ->
+         name = snake["name"]
 
-  def head(state) do
-    hd coords(state)
-  end
+         val = utility(world, snake)
 
-  def tail(state) do
-    tl coords(state)
-  end
+         put_in acc[name], val
+       end
 
-  def coords(state) do
-    this(state)["coords"]
-  end
+       local = put_in(local.utility, utility)
 
-  def this(state) do
-    state.snake_map[@name]
-  end
+       if Local.score(local) <= 0 do
+         # don't expand nodes that result in death
+         [local]
+       else
+         search(local, depth - 1)
+       end
+     end
+   end
 
-  def wall?(state, [_, -1]), do: true
-  def wall?(state, [-1, _]), do: true
-  def wall?(state, [y, x]) do
-    max = length(state["board"])
-    x == max || y == max
-  end
+   def utility(state, snake) do
+     len = length(snake["coords"])
+     dist = distance_from_food(state, snake)
+
+     d = if dist == 0, do: 1, else: 1 / dist
+     0.0 + d + len
+   end
+
+  def distance_from_food(state, snake) do
+     head = hd snake["coords"]
+     food = state["food"]
+
+     distance_from_food(head: head, food: food)
+   end
+
+   def distance_from_food(head: _, food: []) do
+     0
+   end
+
+   def distance_from_food(head: head, food: food) do
+      Enum.min Stream.map(food, fn apple ->
+       V.distance(apple, head)
+     end)
+   end
 end
