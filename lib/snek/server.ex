@@ -1,9 +1,9 @@
 defmodule Snek.Server do
   @size 20
-  @max_food 1
+  @max_food 6
   @valid_range 0..(@size - 1)
   @draw_frames 1
-  @turn_delay 50
+  @turn_delay 0
   @clear false
 
   import Snek.World
@@ -14,7 +14,7 @@ defmodule Snek.Server do
     snakes = [
       %{
         "color" => "#6699ff",
-        "coords" => [[4, 4], [4, 4], [4, 4]],
+        "coords" => (for _ <- 0..3, do: [4, 4]),
         "head_url" => "",
         "name" => "Snek",
         "taunt" => "gotta go fast",

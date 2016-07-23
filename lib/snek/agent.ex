@@ -7,20 +7,37 @@ defmodule Snek.Agent do
   def move(state, name) do
     state = World.set_dimensions state
     state = put_in state["board"], nil
-    move %Local{
+
+    local = %Local{
       name: name,
       world: state,
     }
+
+    size = length(Local.this(local)["coords"])
+
+    local = put_in local.size, size
+
+    move local
   end
 
   defp move(local) do
-    locals = search(local, 3)
+    locals = search(local, 2)
+    IO.inspect length locals
 
-    local = Enum.max_by locals, fn local ->
-      Local.score(local) + Local.heuristic(local)
-    end
+    local = best_move locals
 
     List.last local.moves
+  end
+
+  def best_move(locals) do
+    Enum.max_by locals, &h/1
+  end
+
+  def h local do
+    f = Local.heuristic(local)
+    m = (1 / length(local.moves))
+    s = Local.score(local)
+    s + m + f
   end
 
   def search(local, 0) do
@@ -28,7 +45,19 @@ defmodule Snek.Agent do
   end
 
   def search(local, depth) do
-    Enum.flat_map @directions, fn dir ->
+    coords = Local.this(local)["coords"]
+
+    ignore = case coords do
+      [a, b |_] ->
+        V.sub(a, b)
+
+      _ ->
+        []
+    end
+
+    dir = @directions -- ignore
+
+    Enum.flat_map dir, fn dir ->
       local = update_in local.moves, fn moves ->
         [dir | moves]
       end
@@ -41,6 +70,7 @@ defmodule Snek.Agent do
       end
 
       snakes = local.world["snakes"]
+
       world = local.world
 
       utility = Enum.reduce snakes, %{}, fn snake, acc ->
@@ -53,11 +83,19 @@ defmodule Snek.Agent do
 
       local = put_in(local.utility, utility)
 
-      if Local.score(local) <= 0 do
-        # don't expand nodes that result in death
-        [local]
-      else
-        search(local, depth - 1)
+      initial_size = local.size
+
+      case Local.size(local) do
+        0 ->
+          # don't expand nodes that result in death
+          []
+
+        x when x > initial_size ->
+          # don't expand nodes any further on terminal nodes
+          [local]
+
+        _ ->
+          search(local, depth - 1)
       end
     end
   end
@@ -83,7 +121,11 @@ defmodule Snek.Agent do
 
   def distance_from_food(head: head, food: food) do
      Enum.min Stream.map(food, fn apple ->
-      V.distance(apple, head)
+       manhatten(head, apple)
     end)
+  end
+
+  def manhatten [y, x], [y2, x2] do
+    abs(y2 - y) + abs(x2 - x)
   end
 end
