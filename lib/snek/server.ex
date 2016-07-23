@@ -155,11 +155,11 @@ defmodule Snek.Server do
           |> get_in(["state"])
           |> case do
             "head" ->
-              "{}"
+              "#{IO.ANSI.blue}[]#{IO.ANSI.reset}"
             "body" ->
-              "[]"
+              "#{IO.ANSI.green}[]#{IO.ANSI.reset}"
             "food" ->
-              "()"
+              "#{IO.ANSI.red}()#{IO.ANSI.reset}"
             "empty" ->
               "  "
           end
