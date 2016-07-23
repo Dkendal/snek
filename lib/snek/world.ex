@@ -18,6 +18,15 @@ defmodule Snek.World do
     Dict.merge default, params
   end
 
+  def moves do
+    [
+      [0, 1],
+      [1, 0],
+      [0, -1],
+      [-1, 0],
+    ]
+  end
+
   # set :rows and :cols on world state
   def set_dimensions state do
     board = board(state)
