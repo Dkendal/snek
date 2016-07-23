@@ -1,6 +1,4 @@
 defmodule Snek.World do
-  @size 20
-  @valid_range 0..(@size - 1)
   @up [-1, 0]
   @down [1, 0]
   @left [0, -1]
@@ -92,9 +90,11 @@ defmodule Snek.World do
 
   def update_board state do
     state = set_objects state
+    max_y = state.rows - 1
+    max_x = state.cols - 1
 
-    board = for y <- @valid_range do
-      for x <- @valid_range do
+    board = for y <- 0..max_y do
+      for x <- 0..max_x do
         case state[:map][y][x] do
           %{} = obj -> obj
           _ -> @empty_obj
@@ -106,21 +106,14 @@ defmodule Snek.World do
   end
 
   # wall collisions
-  def dead?(_state, %{"coords" => [[-1, _] | _]}),
-    do: true
-  def dead?(_state, %{"coords" => [[_, -1] | _]}),
-    do: true
-  def dead?(_state, %{"coords" => [[@size, _] | _]}),
-    do: true
-  def dead?(_state, %{"coords" => [[_, @size] | _]}),
-    do: true
-
-  # check for collisions with snake bodies
-  def dead?(state, %{"coords" => [head | _]}) do
+  def dead?(%{rows: r, cols: c} = state, %{"coords" => [[y, x] |_]})
+  when y in 0..(r - 1) and x in 0..(c - 1) do
     Enum.any? state["snakes"], fn %{"coords" => [_ | body]} ->
-      Enum.member? body, head
+      Enum.member? body, [y, x]
     end
   end
+
+  def dead?(_, _), do: true
 
   def clean_up_dead state do
     state = update_in state["snakes"], fn snakes ->

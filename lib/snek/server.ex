@@ -1,6 +1,6 @@
 defmodule Snek.Server do
-  @size 20
-  @max_food 6
+  @size 10
+  @max_food 1
   @valid_range 0..(@size - 1)
   @draw_frames 1
   @turn_delay 0
@@ -27,7 +27,9 @@ defmodule Snek.Server do
       "turn" => 0,
       "board" => board,
       "snakes" => snakes,
-      "food" => []
+      "food" => [],
+      rows: @size,
+      cols: @size,
     }
 
     state
@@ -103,8 +105,8 @@ defmodule Snek.Server do
   end
 
   def rand_unoccupied_space(snakes, food) do
-    x = :random.uniform(@size) - 1
-    y = :random.uniform(@size) - 1
+    x = :rand.uniform(@size) - 1
+    y = :rand.uniform(@size) - 1
 
     new_pos = [y, x]
 

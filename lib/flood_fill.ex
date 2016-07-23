@@ -105,10 +105,11 @@ defmodule FloodFill do
       neighbours = Stream.map(moves, & Vector.add(&1, current))
 
       neighbours = Stream.reject neighbours, fn
-        [y, x] when y in [-1, max_y] or x in [-1, max_x] ->
+        [y, x] when y in 0..max_y and x in 0..max_x ->
+          MapSet.member?(processed, [y, x])
+
+        _ ->
           true
-        pos ->
-          MapSet.member?(processed, pos)
       end
     end
   end
