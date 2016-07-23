@@ -1,26 +1,19 @@
 defmodule Snek.Server do
+  alias Snek.{World, Snake}
+
+  import Snek.World
+
   @size 11
   @max_food 1
   @draw_frames 1
   @turn_delay 0
   @clear false
 
-  import Snek.World
-
   def start do
     board = for x <- 0..@size, do: for y <- 0..@size, do: %{}
 
-    starting_pos = [:rand.uniform(@size), :rand.uniform(@size)]
-
     snakes = [
-      %{
-        "color" => "#6699ff",
-        "coords" => (for _ <- 0..3, do: starting_pos),
-        "head_url" => "",
-        "name" => "Snek",
-        "taunt" => "gotta go fast",
-        "url" => "http://localhost:4000"
-      }
+      Snake.new(%{"name" => "Snek"}, @size, @size),
     ]
 
     state = %{
