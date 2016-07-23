@@ -1,5 +1,5 @@
 defmodule Snek.Server do
-  @size 10
+  @size 11
   @max_food 1
   @valid_range 0..(@size - 1)
   @draw_frames 1
@@ -11,10 +11,12 @@ defmodule Snek.Server do
   def start do
     board = for x <- 0..@size, do: for y <- 0..@size, do: %{}
 
+    starting_pos = [:rand.uniform(@size), :rand.uniform(@size)]
+
     snakes = [
       %{
         "color" => "#6699ff",
-        "coords" => (for _ <- 0..3, do: [4, 4]),
+        "coords" => (for _ <- 0..3, do: starting_pos),
         "head_url" => "",
         "name" => "Snek",
         "taunt" => "gotta go fast",

@@ -2,6 +2,8 @@ defmodule Snek.Agent do
   alias Snek.{World, Local}
   alias Vector, as: V
 
+  @lookahead 2
+
   @directions ~W(up down left right)
 
   def move(state, name) do
@@ -13,7 +15,7 @@ defmodule Snek.Agent do
       world: state,
     }
 
-    size = length(Local.this(local)["coords"])
+    size = Local.size(local)
 
     local = put_in local.size, size
 
@@ -21,16 +23,18 @@ defmodule Snek.Agent do
   end
 
   defp move(local) do
-    locals = search(local, 2)
-    IO.inspect length locals
+    locals = search(local, @lookahead)
 
-    local = best_move locals
+    best_move locals
+  end
 
-    List.last local.moves
+  def best_move([]) do
+    Enum.random @directions
   end
 
   def best_move(locals) do
-    Enum.max_by locals, &h/1
+    local = Enum.max_by(locals, &h/1)
+    List.last(local.moves)
   end
 
   def h local do
