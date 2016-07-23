@@ -23,7 +23,7 @@ defmodule Snek.Agent do
   end
 
   defp move(local) do
-    locals = search(local, @lookahead)
+    locals = search(local, 1)
 
     best_move locals
   end
@@ -66,12 +66,9 @@ defmodule Snek.Agent do
         [dir | moves]
       end
 
-      local = update_in local.world, fn state ->
-        state
-        |> World.apply_moves(%{local.name => dir})
-        |> World.step()
-        |> World.set_objects()
-      end
+      moves = %{local.name => dir}
+
+      local = Local.step local, moves
 
       snakes = local.world["snakes"]
 

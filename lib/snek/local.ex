@@ -1,5 +1,7 @@
 # local representation of a world state, with the name of the snake enocoded
 defmodule Snek.Local do
+  alias Snek.{World}
+
   defstruct [
     :name, # name of this snake
     :world, # game state
@@ -7,6 +9,15 @@ defmodule Snek.Local do
     size: 0,
     utility: %{}
   ]
+
+  def step local, moves do
+    update_in local.world, fn state ->
+      state
+      |> World.apply_moves(moves)
+      |> World.step()
+      |> World.set_objects()
+    end
+  end
 
   def score local do
     get_in(local.utility, [Access.key(local.name, 0.0)])
