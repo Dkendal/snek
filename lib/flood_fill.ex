@@ -25,7 +25,7 @@ defmodule FloodFill do
   #  13. Return.
   def flood_fill_count(coords: coords, world: world) do
     start = hd coords
-    dim = {world.rows, world.cols}
+    dim = {world.rows - 1, world.cols - 1}
     queue = :queue.new
 
     processed = MapSet.new
