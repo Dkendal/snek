@@ -1,7 +1,6 @@
 defmodule Snek.Server do
   @size 11
   @max_food 1
-  @valid_range 0..(@size - 1)
   @draw_frames 1
   @turn_delay 0
   @clear false
