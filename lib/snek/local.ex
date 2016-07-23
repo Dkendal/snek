@@ -31,6 +31,5 @@ defmodule Snek.Local do
 
   def heuristic local do
     free_space = FloodFill.flood_fill_count(local)
-    (free_space + 0.1) / 10
   end
 end
