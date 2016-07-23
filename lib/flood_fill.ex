@@ -1,5 +1,5 @@
 defmodule FloodFill do
-  alias Snek.{World}
+  alias Snek.{World, Local}
 
   def flood_fill_count(coords: [], world: _) do
     0
@@ -45,7 +45,7 @@ defmodule FloodFill do
   end
 
   def flood_fill_count(local) do
-    coords = Snek.Agent.Local.this(local)["coords"]
+    coords = Local.this(local)["coords"]
 
     flood_fill_count coords: coords, world: local.world
   end

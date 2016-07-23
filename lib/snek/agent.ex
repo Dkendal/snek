@@ -1,39 +1,8 @@
 defmodule Snek.Agent do
-  alias Snek.{World}
+  alias Snek.{World, Local}
   alias Vector, as: V
 
   @directions ~W(up down left right)
-
-
-  # local representation of a world state, with the name of the snake enocoded
-  defmodule Local do
-    defstruct [
-      :name, # name of this snake
-      :world, # game state
-      moves: [],
-      utility: %{}
-    ]
-
-    def score local do
-      get_in(local.utility, [Access.key(local.name, 0.0)])
-    end
-
-    @dead %{
-      "coords" => []
-    }
-
-    # returns this snake
-    def this local do
-      local.world.snake_map[local.name] || @dead
-    end
-
-    def heuristic local do
-      free_space = FloodFill.flood_fill_count(local)
-      len = length(this(local)["coords"]) || 0
-
-      Enum.min [free_space, len]
-    end
-  end
 
   def move(state, name) do
     state = World.set_dimensions state
