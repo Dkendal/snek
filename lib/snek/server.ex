@@ -2,8 +2,9 @@ defmodule Snek.Server do
   @size 20
   @max_food 1
   @valid_range 0..(@size - 1)
-  @draw_frames 4
+  @draw_frames 1
   @turn_delay 50
+  @clear false
 
   import Snek.World
 
@@ -75,7 +76,6 @@ defmodule Snek.Server do
 
     moves = Enum.into moves, %{}
 
-    IO.inspect moves
     apply_moves state, moves
   end
 
