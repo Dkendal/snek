@@ -22,6 +22,7 @@ defmodule Snek.Local do
     |> update_utility
   end
 
+  # update the fitness of all snakes on this forecasted turn
   def update_utility local do
     world = local.world
 

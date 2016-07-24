@@ -1,20 +1,40 @@
 defmodule Snek.AgentTest do
   use ExUnit.Case, async: true
 
-  setup do
-    snakes = [
-      %{
-        "coords" => [[3, 0]],
-        "name" => "Snek",
-      }
-    ]
+  import Snek.Agent
 
-    food = [[0,0]]
+  describe "#cartesian" do
+    test "works with two sets" do
+      input = [
+        [1, 2],
+        [:a, :b],
+      ]
 
-    state = Snek.World.new %{"snakes" => snakes, "food" => food}
+      assert cartesian(input) == [
+        [1, :a],
+        [1, :b],
+        [2, :a],
+        [2, :b],
+      ]
+    end
 
-    state = Snek.World.update_board(state)
+    test "works with multiple lists" do
+      input = [
+        [1, 2],
+        [:a, :b],
+        [:c, :d],
+      ]
 
-    %{state: state}
+      assert cartesian(input) == [
+        [1, :a, :c],
+        [1, :a, :d],
+        [1, :b, :c],
+        [1, :b, :d],
+        [2, :a, :c],
+        [2, :a, :d],
+        [2, :b, :c],
+        [2, :b, :d]
+      ]
+    end
   end
 end

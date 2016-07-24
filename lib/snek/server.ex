@@ -14,7 +14,7 @@ defmodule Snek.Server do
 
     snakes = [
       Snake.new(%{"name" => "Snek"}, @size, @size),
-      # Snake.new(%{"name" => "Test"}, @size, @size),
+      Snake.new(%{"name" => "Test"}, @size, @size),
     ]
 
     state = %{

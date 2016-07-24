@@ -4,7 +4,7 @@ defmodule Snek.Agent do
 
   import Snek.Heuristics
 
-  @lookahead 2
+  @lookahead 1
 
   @directions ~W(up down left right)
 
@@ -46,33 +46,59 @@ defmodule Snek.Agent do
     s + m + f
   end
 
+  def cartesian [] do
+    []
+  end
+
+  def cartesian [a] do
+    a
+  end
+
+  def cartesian [a, b | t] do
+    cartesian(cartesian(a, b), t)
+  end
+
+  def cartesian(a, []) do
+    a
+  end
+
+  def cartesian(a, [b | t]) when is_list(b) do
+    val = for x <- a, y <- b, do: x++[y]
+    cartesian(val, t)
+  end
+
+  def cartesian a, b do
+    for x <- a, y <- b, do: [x, y]
+  end
+
   def search(local, 0) do
     [local]
   end
 
   def search(local, depth) do
-    coords = Local.this(local)["coords"]
+    initial_size = local.size
 
-    ignore = case coords do
-      [a, b |_] ->
-        V.sub(a, b)
+    coords = Local.coords(local)
 
-      _ ->
-        []
-    end
+    dir = @directions
 
-    dir = @directions -- ignore
+    snakes = local.world["snakes"]
 
-    Enum.flat_map dir, fn dir ->
+    moves =
+      for s <- snakes,
+      do: for d <- @directions, do: {s["name"], d}
+
+    moves = cartesian moves
+
+    Enum.flat_map moves, fn moves ->
+      moves = Enum.into moves, %{}
+      dir = moves[local.name]
+
       local = update_in local.moves, fn moves ->
         [dir | moves]
       end
 
-      moves = %{local.name => dir}
-
       local = Local.step local, moves
-
-      initial_size = local.size
 
       case Local.size(local) do
         0 ->
