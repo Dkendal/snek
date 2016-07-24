@@ -51,7 +51,7 @@ defmodule Snek.Agent do
   end
 
   def cartesian [a] do
-    a
+    for x <- a, do: [x]
   end
 
   def cartesian [a, b | t] do

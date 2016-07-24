@@ -4,6 +4,17 @@ defmodule Snek.AgentTest do
   import Snek.Agent
 
   describe "#cartesian" do
+    test "works with one set" do
+      input = [
+        [1, 2]
+      ]
+
+      assert cartesian(input) == [
+        [1],
+        [2],
+      ]
+    end
+
     test "works with two sets" do
       input = [
         [1, 2],
