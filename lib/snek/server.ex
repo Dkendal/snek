@@ -3,10 +3,10 @@ defmodule Snek.Server do
 
   import Snek.World
 
-  @size 20
+  @size 4
   @max_food 1
   @draw_frames 1
-  @turn_delay 0
+  @turn_delay 100
   @clear false
 
   def start do
@@ -14,7 +14,7 @@ defmodule Snek.Server do
 
     snakes = [
       Snake.new(%{"name" => "Snek"}, @size, @size),
-      Snake.new(%{"name" => "Test"}, @size, @size),
+      #Snake.new(%{"name" => "Test"}, @size, @size),
     ]
 
     state = %{
@@ -68,6 +68,7 @@ defmodule Snek.Server do
     moves = for snake <- state["snakes"] do
       name = snake["name"]
       direction = Snek.Agent.move(state, name)
+      IO.inspect "#{name} => #{direction}"
       {name, direction}
     end
 
@@ -103,7 +104,7 @@ defmodule Snek.Server do
     x = :rand.uniform(@size) - 1
     y = :rand.uniform(@size) - 1
 
-    new_pos = [y, x]
+    new_pos = [x, y]
 
     if not new_pos in snakes and not new_pos in food do
       new_pos
@@ -115,40 +116,42 @@ defmodule Snek.Server do
   def print(%{"board" => board, "food" => food, "snakes" => snakes} = state) do
     coords = Enum.flat_map snakes, & &1["coords"]
 
-    max = @size
+    rows = length board
+    max = rows
     min = -1
     range = min..max
 
     # clear
+    IO.write("\n")
     if @clear, do: IO.write("\ec")
 
     for y <- range, x <- range do
-      case {y, x} do
-        {^min, ^min} ->
+      case {x, y} do
+        {-1, -1} ->
           " ╔"
-
-        {^min, ^max} ->
-          "╗ "
-
-        {^max, ^min} ->
-          " ╚"
 
         {^max, ^max} ->
           "╝ "
 
-        {y, x} when y in [min, max] and not x in [min, max] ->
-          "══"
+        {^max, -1} ->
+          "╗ "
 
-        {_, ^min} ->
+        {-1, ^max} ->
+          " ╚"
+
+        {-1, _} ->
           " ║"
 
-        {_, ^max} ->
+        {^max, _} ->
           "║ "
 
-        {y, x} ->
+        {_, y} when y in [min, max] ->
+          "══"
+
+        {x, y} ->
           board
-          |> Enum.at(y)
           |> Enum.at(x)
+          |> Enum.at(y)
           |> get_in(["state"])
           |> case do
             "head" ->

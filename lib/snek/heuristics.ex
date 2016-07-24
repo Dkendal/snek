@@ -24,7 +24,7 @@ defmodule Snek.Heuristics do
     end)
   end
 
-  def manhatten [y, x], [y2, x2] do
+  def manhatten [x, y], [x2, y2] do
     abs(y2 - y) + abs(x2 - x)
   end
 end

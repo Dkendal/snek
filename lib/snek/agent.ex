@@ -4,12 +4,12 @@ defmodule Snek.Agent do
 
   import Snek.Heuristics
 
-  @lookahead 1
+  @lookahead 2
 
   @directions ~W(up down left right)
 
   def move(state, name) do
-    state = World.set_dimensions state
+    state = World.set_objects World.set_dimensions state
     state = put_in state["board"], nil
 
     local = %Local{

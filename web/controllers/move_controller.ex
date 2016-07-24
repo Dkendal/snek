@@ -1,9 +1,11 @@
 defmodule Snek.MoveController do
+  alias Snek.{Agent}
+
   use Snek.Web, :controller
 
-  alias Snek.Move
+  def index(conn, params) do
+    move = Agent.move(params, "Snek")
 
-  def index(conn, _params) do
-    render(conn, "index.json", [])
+    render(conn, "index.json", move: move)
   end
 end

@@ -1,8 +1,8 @@
 defmodule Snek.World do
   @up [-1, 0]
   @down [1, 0]
-  @left [0, -1]
   @right [0, 1]
+  @left [0, -1]
   @food_obj %{"state" => "food"}
   @empty_obj %{"state" => "empty"}
 
@@ -57,8 +57,8 @@ defmodule Snek.World do
   end
 
   def put_food_in_map state do
-    Enum.reduce state["food"], state, fn [y, x], state ->
-      put_in state, path(y, x), @food_obj
+    Enum.reduce state["food"], state, fn [x, y], state ->
+      put_in state, path(x, y), @food_obj
     end
   end
 
@@ -68,12 +68,12 @@ defmodule Snek.World do
       head_obj = %{"state" => "head", name => name}
       body_obj = %{"state" => "body", name => name}
 
-      [[y, x] | body] = Enum.uniq snake["coords"]
+      [[x, y] | body] = Enum.uniq snake["coords"]
 
-      state = put_in state, path(y, x), head_obj
+      state = put_in state, path(x, y), head_obj
 
-      Enum.reduce body, state, fn [y, x], state ->
-        put_in state, path(y, x), body_obj
+      Enum.reduce body, state, fn [x, y], state ->
+        put_in state, path(x, y), body_obj
       end
     end
   end
@@ -97,7 +97,7 @@ defmodule Snek.World do
 
     board = for y <- 0..max_y do
       for x <- 0..max_x do
-        case state[:map][y][x] do
+        case state[:map][x][y] do
           %{} = obj -> obj
           _ -> @empty_obj
         end
@@ -108,10 +108,10 @@ defmodule Snek.World do
   end
 
   # wall collisions
-  def dead?(%{rows: r, cols: c} = state, %{"coords" => [[y, x] |_]})
+  def dead?(%{rows: r, cols: c} = state, %{"coords" => [[x, y] |_]})
   when y in 0..(r - 1) and x in 0..(c - 1) do
     Enum.any? state["snakes"], fn %{"coords" => [_ | body]} ->
-      Enum.member? body, [y, x]
+      Enum.member? body, [x, y]
     end
   end
 
@@ -211,7 +211,7 @@ defmodule Snek.World do
   end
 
   def move(snake, direction) do
-    [dy, dx] = case direction do
+    [dx, dy] = case direction do
       "up" ->
         @up
       "down" ->
@@ -224,11 +224,11 @@ defmodule Snek.World do
 
     body = snake["coords"]
 
-    [y, x] = hd(body)
+    [x, y] = hd(body)
 
     tail = List.delete_at(body, -1)
 
-    new_coords = [[dy + y, dx + x]] ++ tail
+    new_coords = [[dx + x, dy + y]] ++ tail
 
     put_in snake["coords"], new_coords
   end
@@ -237,11 +237,11 @@ defmodule Snek.World do
     state["board"]
   end
 
-  def path(y, x) do
+  def path(x, y) do
     [
       Access.key(:map, %{}),
+      Access.key(x, %{}),
       Access.key(y, %{}),
-      Access.key(x, %{})
     ]
   end
 end
