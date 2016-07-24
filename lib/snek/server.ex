@@ -3,7 +3,7 @@ defmodule Snek.Server do
 
   import Snek.World
 
-  @size 11
+  @size 20
   @max_food 1
   @draw_frames 1
   @turn_delay 0
@@ -14,6 +14,7 @@ defmodule Snek.Server do
 
     snakes = [
       Snake.new(%{"name" => "Snek"}, @size, @size),
+      # Snake.new(%{"name" => "Test"}, @size, @size),
     ]
 
     state = %{

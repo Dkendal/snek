@@ -2,6 +2,8 @@
 defmodule Snek.Local do
   alias Snek.{World}
 
+  import Snek.Heuristics
+
   defstruct [
     :name, # name of this snake
     :world, # game state
@@ -11,12 +13,29 @@ defmodule Snek.Local do
   ]
 
   def step local, moves do
-    update_in local.world, fn state ->
+    update_in(local.world, fn state ->
       state
       |> World.apply_moves(moves)
       |> World.step()
       |> World.set_objects()
+    end)
+    |> update_utility
+  end
+
+  def update_utility local do
+    world = local.world
+
+    snakes = world["snakes"]
+
+    utility = Enum.reduce snakes, %{}, fn snake, acc ->
+      name = snake["name"]
+
+      val = utility(world, snake)
+
+      put_in acc[name], val
     end
+
+    put_in(local.utility, utility)
   end
 
   def score local do
