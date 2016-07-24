@@ -29,8 +29,10 @@ defmodule FloodFillTest do
 
     world = %{
       map: %{
-        2 => %{0 => %{"state" => "head", "snake" => "test"}},
-        2 => %{1 => %{"state" => "body", "snake" => "test"}},
+        2 => %{
+          0 => %{"state" => "head", "snake" => "test"},
+          1 => %{"state" => "body", "snake" => "test"}
+        },
         1 => %{1 => %{"state" => "body", "snake" => "test"}},
         0 => %{1 => %{"state" => "body", "snake" => "test"}},
       },
@@ -41,11 +43,12 @@ defmodule FloodFillTest do
       cols: 3,
     }
 
-    # +------+
-    # |  []  |
-    # |  []  |
-    # |{}[]  |
-    # +------+
+    #    0 1 2
+    #  +------+
+    # 0|  []  |
+    # 1|  []  |
+    # 2|{}[]  |
+    #  +------+
 
     local = %Local{name: "test", world: world}
 
