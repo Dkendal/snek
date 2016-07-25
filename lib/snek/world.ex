@@ -22,10 +22,10 @@ defmodule Snek.World do
 
   def moves do
     [
-      [0, 1],
-      [1, 0],
-      [0, -1],
-      [-1, 0],
+      up,
+      down,
+      left,
+      right,
     ]
   end
 
@@ -119,39 +119,6 @@ defmodule Snek.World do
 
   def dead?(_, _), do: true
 
-  def head_to_head(snakes, acc \\ [])
-
-  def head_to_head([], acc) do
-    acc
-  end
-
-  def head_to_head(snakes, acc) do
-    snakes
-    |> Enum.group_by(& hd(&1["coords"]))
-    |> Enum.map(fn
-       {_, [snake]} ->
-         snake
-
-       {_, snakes} ->
-         snakes = snakes
-         |> Enum.map(& {Snake.len(&1), &1})
-         |> Enum.sort_by(& - elem(&1, 0))
-
-         case snakes do
-           [{size, _}, {size, _} | _] ->
-             # one or more are the same size
-             # all die
-             nil
-           [{_, snake} | victims] ->
-             growth = victims
-             |> Enum.map(& elem(&1, 0))
-             |> Enum.sum
-             growth = round(growth / 2)
-             Snake.grow(snake, growth)
-         end
-    end) |> Enum.reject(& &1 == nil)
-  end
-
   def clean_up_dead state do
     state = update_in state["snakes"], fn snakes ->
       snakes = Enum.reduce snakes, [], fn snake, snakes ->
@@ -162,7 +129,7 @@ defmodule Snek.World do
         end
       end
 
-      head_to_head(snakes)
+      Snake.head_to_head(snakes)
     end
   end
 
