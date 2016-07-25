@@ -68,7 +68,6 @@ defmodule Snek.Server do
     moves = for snake <- state["snakes"] do
       name = snake["name"]
       direction = Snek.Agent.move(state, name)
-      IO.inspect "#{name} => #{direction}"
       {name, direction}
     end
 

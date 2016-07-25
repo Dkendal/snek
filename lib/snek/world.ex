@@ -1,13 +1,15 @@
 defmodule Snek.World do
   @food_obj %{"state" => "food"}
-  @empty_obj %{"state" => "empty"}
 
-  alias Snek.{Snake}
+  alias Snek.{Snake, Board}
 
-  def new(params) do
+  def new(params, width: width, height: height) do
+    board = Board.new(width, height)
+
     default = %{
       "snakes" => [],
       "food" => [],
+      "board" => board
     }
 
     Dict.merge default, params
@@ -26,7 +28,6 @@ defmodule Snek.World do
       [-1, 0],
     ]
   end
-
 
   # set :rows and :cols on world state
   def set_dimensions state do
@@ -100,7 +101,7 @@ defmodule Snek.World do
       for y <- 0..max_y do
         case state[:map][x][y] do
           %{} = obj -> obj
-          _ -> @empty_obj
+          _ -> Board.empty
         end
       end
     end
