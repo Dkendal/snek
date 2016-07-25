@@ -1,6 +1,4 @@
 defmodule Snek.World do
-  @food_obj %{"state" => "food"}
-
   alias Snek.{Snake, Board}
 
   def new(params, width: width, height: height) do
@@ -60,7 +58,7 @@ defmodule Snek.World do
 
   def put_food_in_map state do
     Enum.reduce state["food"], state, fn [x, y], state ->
-      put_in state, path(x, y), @food_obj
+      put_in state, path(x, y), Board.food
     end
   end
 

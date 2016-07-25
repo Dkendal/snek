@@ -8,4 +8,5 @@ defmodule Snek.Board do
   end
 
   def empty, do: %{"state" => "empty"}
+  def food, do: %{"state" => "food"}
 end
