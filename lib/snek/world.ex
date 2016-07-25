@@ -30,12 +30,12 @@ defmodule Snek.World do
   # set :rows and :cols on world state
   def set_dimensions state do
     board = board(state)
-    rows = length board
-    cols = length hd board
+    height = Board.height(board)
+    width = Board.width(board)
 
     state
-    |> put_in([:rows], rows)
-    |> put_in([:cols], cols)
+    |> put_in([:rows], height)
+    |> put_in([:cols], width)
   end
 
   def step(state) do
@@ -46,7 +46,7 @@ defmodule Snek.World do
   end
 
   def update_board state do
-    state = World.Map.set_objects state
+    state = World.Map.set_objects(state)
     max_y = state.rows - 1
     max_x = state.cols - 1
 

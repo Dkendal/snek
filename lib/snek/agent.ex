@@ -9,7 +9,7 @@ defmodule Snek.Agent do
   @directions ~W(up down left right)
 
   def move(state, name) do
-    state = World.set_objects World.set_dimensions state
+    state = World.Map.set_objects World.set_dimensions state
     state = put_in state["board"], nil
 
     local = %Local{

@@ -17,7 +17,7 @@ defmodule Snek.Local do
       state
       |> World.apply_moves(moves)
       |> World.step()
-      |> World.set_objects()
+      |> World.Map.set_objects()
     end)
     |> update_utility
   end

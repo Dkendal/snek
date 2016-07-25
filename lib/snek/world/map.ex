@@ -1,4 +1,6 @@
 defmodule Snek.World.Map do
+  alias Snek.{Board}
+
   # set the :snake_map index
   def put_snakes_in_map state do
     snake_map = Enum.reduce state["snakes"], %{}, fn snake, acc ->
