@@ -1,13 +1,8 @@
 defmodule Snek.World do
-  @up [-1, 0]
-  @down [1, 0]
-  @right [0, 1]
-  @left [0, -1]
   @food_obj %{"state" => "food"}
   @empty_obj %{"state" => "empty"}
 
   alias Snek.{Snake}
-
 
   def new(params) do
     default = %{
@@ -18,6 +13,11 @@ defmodule Snek.World do
     Dict.merge default, params
   end
 
+  def up,     do: [0, -1]
+  def down,   do: [0,  1]
+  def right,  do: [1,  0]
+  def left,   do: [-1,  0]
+
   def moves do
     [
       [0, 1],
@@ -26,6 +26,7 @@ defmodule Snek.World do
       [-1, 0],
     ]
   end
+
 
   # set :rows and :cols on world state
   def set_dimensions state do
@@ -95,8 +96,8 @@ defmodule Snek.World do
     max_y = state.rows - 1
     max_x = state.cols - 1
 
-    board = for y <- 0..max_y do
-      for x <- 0..max_x do
+    board = for x <- 0..max_x do
+      for y <- 0..max_y do
         case state[:map][x][y] do
           %{} = obj -> obj
           _ -> @empty_obj
@@ -212,14 +213,10 @@ defmodule Snek.World do
 
   def move(snake, direction) do
     [dx, dy] = case direction do
-      "up" ->
-        @up
-      "down" ->
-        @down
-      "left" ->
-        @left
-      "right" ->
-        @right
+      "up" -> up
+      "down" -> down
+      "left" -> left
+      "right" -> right
     end
 
     body = snake["coords"]
