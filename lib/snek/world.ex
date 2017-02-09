@@ -29,9 +29,8 @@ defmodule Snek.World do
 
   # set :rows and :cols on world state
   def set_dimensions state do
-    board = board(state)
-    height = Board.height(board)
-    width = Board.width(board)
+    height = state["height"]
+    width = state["width"]
 
     state
     |> put_in([:rows], height)
@@ -58,8 +57,6 @@ defmodule Snek.World do
         end
       end
     end
-
-    state = put_in state["board"], board
   end
 
   # wall collisions
@@ -149,9 +146,5 @@ defmodule Snek.World do
     new_coords = [[dx + x, dy + y]] ++ tail
 
     put_in snake["coords"], new_coords
-  end
-
-  def board(state) do
-    state["board"]
   end
 end

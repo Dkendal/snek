@@ -34,6 +34,7 @@ defmodule Snek.Mixfile do
       :logger,
       :phoenix,
       :phoenix_pubsub,
+      :dbg,
     ]
   end
 
@@ -50,7 +51,8 @@ defmodule Snek.Mixfile do
       {:gettext, "~> 0.11"},
       {:phoenix, "~> 1.2.0"},
       {:phoenix_pubsub, "~> 1.0"},
-      {:reprise, "~> 0.5", only: :dev}
+      {:reprise, "~> 0.5", only: :dev},
+      {:dbg, github: "fishcakez/dbg"},
     ]
   end
 end
